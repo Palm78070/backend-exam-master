@@ -34,6 +34,6 @@ class Solution:
 
 # if __name__ == "__main__":
 #     # list = [1, 1.1, 2, 3.33, -123.33, 1]
-#     # list = [1,2,1,3,5,6,4]
+#     # list = [1,2,1,3,5,6,4, 1 * float('inf')]
 #     result = Solution().find_max_index(list)
 #     print(f"result: {result}")
