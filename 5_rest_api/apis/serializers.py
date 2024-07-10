@@ -13,3 +13,27 @@ class SchoolSerializer(serializers.ModelSerializer):
 		#model and fields that we want to serialize
 		model = School
 		fields = '__all__'
+
+class ClassroomSerializer(serializers.ModelSerializer):
+	#StringRelatedField is typically used when you want to represent a related model instance as a string (usually the __str__ representation of the related object).
+	#many=True => there can be multiple related instances
+	teachers = serializers.StringRelatedField(many=True, read_only=True)
+	students = serializers.StringRelatedField(many=True, read_only=True)
+
+	class Meta:
+		model = Classroom
+		fields = '__all__'
+
+class TeacherSerializer(serializers.ModelSerializer):
+	clossrooms = serializers.StringRelatedField(many=True, read_only=True)
+
+	class Meta:
+		model = Teacher
+		fields = '__all__'
+
+class StudentSerializer(serializers.ModelSerializer):
+	classroom = serializers.StringRelatedField(read_only=True)
+
+	class Meta:
+		model = Student
+		fields = '__all__'
