@@ -1,8 +1,11 @@
 rest_api_venv/
 venv_rest_api/
+__pycache__/
 **/__pycache__/
+**/__pycache__/*.pyc
 5_rest_api/apis/__pycache__/*.pyc
 *.py[cod]
 **/*.pyc
 *$py.class
 .DS_Store
+5_rest_api/db.sqlite3
