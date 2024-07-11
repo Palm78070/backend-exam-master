@@ -6,7 +6,7 @@ from ...filters import SchoolFilter
 
 class SchoolViewSet(viewsets.ModelViewSet):
 	queryset = School.objects.all()
-	serializer = SchoolSerializer
+	serializer_class = SchoolSerializer
 	filter_backends = [DjangoFilterBackend] #used to apply filtering to querysets based on URL parameters
 	filterset_class = SchoolFilter
 

@@ -1,2 +1,8 @@
 rest_api_venv/
+venv_rest_api/
+**/__pycache__/
+5_rest_api/apis/__pycache__/*.pyc
+*.py[cod]
+**/*.pyc
+*$py.class
 .DS_Store
