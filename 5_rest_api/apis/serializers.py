@@ -30,11 +30,24 @@ class ClassroomSerializer(serializers.ModelSerializer):
 	#many=True => there can be multiple related instances
 	teachers = serializers.StringRelatedField(many=True, read_only=True)
 	students = serializers.StringRelatedField(many=True, read_only=True)
-	# school = serializers.StringRelatedField()
+	school_name = serializers.CharField(write_only=True) # Add the school_name field for input
+	school = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Classroom
-		fields = '__all__'
+		fields = ['year', 'room_number', 'school_name', 'school', 'teachers', 'students']
+		# fields = '__all__'
+
+	def create(self, validated_data):
+		school_name = validated_data.pop('school_name') ## Get the school name from the validated data
+		school = School.objects.get(name=school_name)
+		if Classroom.objects.filter(year=validated_data['year'], room_number=validated_data['room_number'], school=school).exists():
+			raise serializers.ValidationError('Classroom already exists')
+		classroom = Classroom.objects.create(school=school, **validated_data)
+		return classroom
+
+	def get_school(self, obj):
+		return obj.school.name
 
 class TeacherSerializer(serializers.ModelSerializer):
 	clossrooms = serializers.StringRelatedField(many=True, read_only=True)

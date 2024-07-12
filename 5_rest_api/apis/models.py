@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 
 # Create your models here.
 class School(models.Model):
@@ -13,6 +14,11 @@ class Classroom(models.Model):
 	year = models.IntegerField()
 	room_number = models.IntegerField()
 	school = models.ForeignKey(School, related_name='classrooms', on_delete=models.CASCADE)
+
+	class Meta:
+		constraints = [
+			UniqueConstraint(fields=['year', 'room_number', 'school'], name='unique_classroom')
+		]
 
 	def __str__(self):
 		return f"{self.year}/{self.room_number}"
