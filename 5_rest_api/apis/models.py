@@ -7,6 +7,11 @@ class School(models.Model):
 	short_name = models.CharField(max_length=20)
 	address = models.TextField()
 
+	class Meta:
+		constraints = [
+			UniqueConstraint(fields=['name'], name='unique_school')
+		]
+
 	def __str__(self): #use to display name of the school object => print(str(school_instance)) name of the school
 		return self.name
 
