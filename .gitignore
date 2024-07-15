@@ -9,4 +9,3 @@ __pycache__/
 *$py.class
 .DS_Store
 5_rest_api/db.sqlite3
-5_rest_api/db.sqlite3
