@@ -7,3 +7,6 @@ This repo is the test exam for position of Backend Developer
 3. number_to_thai
 4. number_to_roman
 5. rest_api
+
+## Subject requierment
+You can see subject requirement of each exercise in main.py, except for ex.5 which specify requirement in api_exam.md
