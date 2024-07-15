@@ -2,12 +2,16 @@ from rest_framework import serializers
 
 from .models import School, Classroom, Teacher, Student
 # code here
+from django.db.models import Count
 
 # class SchoolField(serializers.RelatedField):
 class SchoolSerializer(serializers.ModelSerializer):
 	classrooms_count = serializers.SerializerMethodField()
 	teachers_count = serializers.SerializerMethodField()
 	students_count = serializers.SerializerMethodField()
+	# classrooms_count = serializers.IntegerField(read_only=True)
+	# teachers_count = serializers.IntegerField(read_only=True)
+	# students_count = serializers.IntegerField(read_only=True)
 
 	class Meta:
 		#model and fields that we want to serialize
@@ -25,6 +29,18 @@ class SchoolSerializer(serializers.ModelSerializer):
 		return Teacher.objects.filter(classrooms__school=obj).distinct().count() #This method use a query to count distinct Teacher obj relate to School => Teacher is get from Classroom that related to School
 	def get_students_count(self, obj):
 		return Student.objects.filter(classroom__school=obj).distinct().count() #This method use a query to count distinct Student obj relate to School => Student is get from Classroom that related to School
+
+	# def to_representation(self, instance): #instance of Model that we want to serialize(School instance)
+	# 	instance = School.objects.prefetch_related(
+	# 		'classrooms',
+	# 		'classrooms__teachers',
+	# 		'classrooms__students'
+	# 	).annotate(
+	# 		classrooms_count=Count('classrooms', distinct=True),
+	# 		teachers_count=Count('classrooms__teachers', distinct=True),
+	# 		students_count=Count('classrooms__students', distinct=True)
+	# 	).get(pk=instance.pk) #ensures that you are fetching the same School object from the database based on its primary key (pk)
+	# 	return super().to_representation(instance) #calls the parent class's (ModelSerializer's) to_representation method
 
 class ClassroomSerializer(serializers.ModelSerializer):
 	#StringRelatedField is typically used when you want to represent a related model instance as a string (usually the __str__ representation of the related object).
