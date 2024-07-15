@@ -2,28 +2,78 @@ from rest_framework import serializers
 
 from .models import School, Classroom, Teacher, Student
 # code here
+from django.db.models import Count
 
+# class SchoolField(serializers.RelatedField):
 class SchoolSerializer(serializers.ModelSerializer):
-	#source specifies where the serializer should look to retrieve data for the field
-	classrooms_count = serializers.IntegerField(source='classrooms.count', read_only=True) #classrooms is the related name in the School model .count() method from Django ORM
-	teachers_count = serializers.IntegerField(source='classrooms__teachers.count', read_only=True)
-	students_count = serializers.IntegerField(source='classrooms__students.count', read_only=True)
+	classrooms_count = serializers.SerializerMethodField()
+	teachers_count = serializers.SerializerMethodField()
+	students_count = serializers.SerializerMethodField()
+	# classrooms_count = serializers.IntegerField(read_only=True)
+	# teachers_count = serializers.IntegerField(read_only=True)
+	# students_count = serializers.IntegerField(read_only=True)
 
 	class Meta:
 		#model and fields that we want to serialize
 		model = School
 		fields = '__all__'
 
+	def validate(self, data):
+		if School.objects.filter(name=data['name']).exists():
+			raise serializers.ValidationError('School already exists!')
+		return data
+
+	def get_classrooms_count(self, obj):
+		return obj.classrooms.count()
+	def get_teachers_count(self, obj):
+		return Teacher.objects.filter(classrooms__school=obj).distinct().count() #This method use a query to count distinct Teacher obj relate to School => Teacher is get from Classroom that related to School
+	def get_students_count(self, obj):
+		return Student.objects.filter(classroom__school=obj).distinct().count() #This method use a query to count distinct Student obj relate to School => Student is get from Classroom that related to School
+
+	# def to_representation(self, instance): #instance of Model that we want to serialize(School instance)
+	# 	instance = School.objects.prefetch_related(
+	# 		'classrooms',
+	# 		'classrooms__teachers',
+	# 		'classrooms__students'
+	# 	).annotate(
+	# 		classrooms_count=Count('classrooms', distinct=True),
+	# 		teachers_count=Count('classrooms__teachers', distinct=True),
+	# 		students_count=Count('classrooms__students', distinct=True)
+	# 	).get(pk=instance.pk) #ensures that you are fetching the same School object from the database based on its primary key (pk)
+	# 	return super().to_representation(instance) #calls the parent class's (ModelSerializer's) to_representation method
+
 class ClassroomSerializer(serializers.ModelSerializer):
 	#StringRelatedField is typically used when you want to represent a related model instance as a string (usually the __str__ representation of the related object).
 	#many=True => there can be multiple related instances
 	teachers = serializers.StringRelatedField(many=True, read_only=True)
 	students = serializers.StringRelatedField(many=True, read_only=True)
-	# school = serializers.StringRelatedField()
+	# school_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all(), source='school')
+	# school_name = serializers.CharField(write_only=True) # Add the school_name field for input
+	# school = serializers.SerializerMethodField()
+	school = serializers.SlugRelatedField(slug_field='name', queryset=School.objects.all())
 
 	class Meta:
 		model = Classroom
-		fields = '__all__'
+		fields = ['id', 'year', 'room_number', 'school', 'teachers', 'students']
+		# fields = '__all__'
+
+	def validate(self, data):
+		#school__name have 2 underscore because school field is ForeignKey in Classroom model => __ use to traverse to school model and check name field
+		# if Classroom.objects.filter(year=data['year'], room_number=data['room_number'], school__name=data['school_name']).exists():
+		if Classroom.objects.filter(year=data['year'], room_number=data['room_number'], school=data['school']).exists():
+			raise serializers.ValidationError('Classroom already exists!')
+		return data
+
+	# def create(self, validated_data):
+	# 	school_name = validated_data.pop('school_name') ## Get the school name from the validated data
+	# 	school = School.objects.get(name=school_name)
+	# 	# if Classroom.objects.filter(year=validated_data['year'], room_number=validated_data['room_number'], school=school).exists():
+	# 	# 	raise serializers.ValidationError('Classroom already exists!')
+	# 	classroom = Classroom.objects.create(school=school, **validated_data)
+	# 	return classroom
+
+	# def get_school(self, obj):
+	# 	return obj.school.name
 
 class TeacherSerializer(serializers.ModelSerializer):
 	clossrooms = serializers.StringRelatedField(many=True, read_only=True)
